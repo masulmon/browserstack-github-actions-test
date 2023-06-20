@@ -1,1 +1,0 @@
-# browserstack-github-actions-test
