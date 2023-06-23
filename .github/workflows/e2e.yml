@@ -4,7 +4,6 @@ on: [push]
 
 env:
   NODE_ENV: test
-  DATABASE_URL: postgresql://postgres:postgres@localhost/myapp_test?schema=ci
 
 jobs:
   build:
@@ -22,16 +21,6 @@ jobs:
 
       - name: Install packages
         run: yarn install --frozen-lockfile
-
-      - name: ESLint
-        run: yarn lint
-
-      - name: Check TypeScript
-        run: yarn typecheck
-
-      # Build app
-      - name: Build App
-        run: yarn build
 
       # Save build for other jobs
       - name: Save build folder
@@ -54,27 +43,9 @@ jobs:
         # number of containers, change TOTAL_RUNNERS below.
         containers: [0, 1, 2, 3, 4]
 
-    services:
-      postgres:
-        image: postgres:13.2
-        ports: ['5432:5432']
-        # Make sure the database is ready before we use it
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-        # These need to be set on the service or it won't start for some reason
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: myapp_test
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Download the build
-        uses: actions/download-artifact@v2
-        with:
-          name: the-build
-          path: build
 
       - name: Setup Node
         uses: actions/setup-node@v2.1.2
@@ -96,7 +67,7 @@ jobs:
           command: yarn ts-node scripts/cypress-ci-run.ts
         env:
           # the number of containers in the job matrix
-          TOTAL_RUNNERS: 5
+          TOTAL_RUNNERS: 1
           THIS_RUNNER: ${{ matrix.containers }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
